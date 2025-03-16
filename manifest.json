@@ -9,5 +9,8 @@
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": "images/hello_extension.png"
-  }
+  },
+  "host_permissions": [
+    "http://127.0.0.1:5000/"
+  ]
 }
