@@ -5,7 +5,6 @@ createFolderForm.addEventListener("submit", (event) => {
 
   const formData = new FormData(createFolderForm);
   const data = Object.fromEntries(formData.entries());
-  console.log(data);
 
   fetch("http://127.0.0.1:5000/folder/add", {
     method: "POST",
