@@ -12,8 +12,22 @@
     <button id="getCurrentTab">Get First Tab</button>
     <button id="saveTabButton">Save Tab</button>
     <button id="apiCallButton">API Call</button>
+    <form id="createFolderForm">
+      <div>
+        <label for="createFolderTitle">Enter a Title</label>
+        <input type="text" id="createFolderTitle" name="title" required />
+      </div>
+      <div>
+        <label for="createFolderDescription"
+          >Provide a description for the folder.</label
+        >
+        <input type="text" id="createFolderDescription" name="description" />
+      </div>
+      <button type="submit">Submit</button>
+    </form>
     <script src="popup.js"></script>
     <script src="../scripts/tab.js"></script>
+    <script src="../scripts/folder.js"></script>
     <script src="../scripts/serverHandler.js"></script>
   </body>
 </html>
