@@ -9,8 +9,8 @@ let currentTab = {};
 /**
  * Retrieves an array of object with tabs and details.
  *
- * @returns {Promise<Object[]>} A promise that resolves with an array of object.
- * @throws {Error} If the query fails and 'chrome.runtime.lastError' is set.
+ * @returns {Promise<Object[]>} - A promise that resolves with an array of object.
+ * @throws {Error} - If the query fails and 'chrome.runtime.lastError' is set.
  */
 function getTabs() {
   return new Promise((resolve, reject) => {
@@ -23,31 +23,6 @@ function getTabs() {
     });
   });
 }
-
-// 'Get Tabs' button
-const tabButton = document.querySelector("#getTabsButton");
-
-/**
- * Print out an array of tabs.
- * Or
- * Print out an error message.
- */
-tabButton.addEventListener("click", async () => {
-  try {
-    tabsArray = await getTabs();
-    console.log(tabsArray);
-  } catch (error) {
-    console.log("Error fetching tabs: ", error);
-  }
-});
-
-/**
- * Print the tabs array
- */
-const printTabsButton = document.querySelector("#printTabsArray");
-printTabsButton.addEventListener("click", () => {
-  console.log(tabsArray);
-});
 
 /**
  * Return the active tab the extension is running.
@@ -65,12 +40,58 @@ function getCurrentTab() {
   });
 }
 
+// 'Get Tabs' button
+const tabButton = document.querySelector("#getTabsButton");
+
+/**
+ * Print out an array of tabs.
+ * Or
+ * Print out an error message.
+ */
+tabButton.addEventListener("click", async () => {
+  let dataArray = [];
+  for (let tab in tabsArray) {
+    const title = tab["title"] != "" ? tab["title"] : tab["url"];
+    const url = tab["url"];
+    const description = tab["title"] != "" ? tab["title"] : tab["url"];
+    const data = { title, url, description };
+    dataArray.push(data);
+  }
+  fetchPost("http://127.0.0.1:5000/url/add/list", data, "Error in adding URL:");
+});
+
+// Print Button
+const printTabsButton = document.querySelector("#printTabsArray");
+/**
+ * Print the tabs array
+ */
+printTabsButton.addEventListener("click", () => {
+  console.log(tabsArray);
+});
+
+// Current Button Tabs
+const currentTabButton = document.querySelector("#getCurrentTab");
 /**
  * Connect a button test to run getCurrentTab.
  */
-const currentTabButton = document.querySelector("#getCurrentTab");
 currentTabButton.addEventListener("click", async () => {
-  let test = await getCurrentTab();
+  await getCurrentTab();
+});
+
+// Save Button
+const saveTabButton = document.querySelector("#saveTabButton");
+/**
+ * Save current tab to database by API called.
+ */
+saveTabButton.addEventListener("click", () => {
+  const title =
+    currentTab["title"] != "" ? currentTab["title"] : currentTab["url"];
+  const url = currentTab["url"];
+  const description =
+    currentTab["title"] != "" ? currentTab["title"] : currentTab["url"];
+  const data = { title, url, description };
+
+  fetchPost("http://127.0.0.1:5000/url/add", data, "Error in adding URL:");
 });
 
 /**
