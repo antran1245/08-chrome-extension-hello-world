@@ -44,9 +44,7 @@ function getCurrentTab() {
 const tabButton = document.querySelector("#getTabsButton");
 
 /**
- * Print out an array of tabs.
- * Or
- * Print out an error message.
+ * Send an array of URL
  */
 tabButton.addEventListener("click", async () => {
   let dataArray = [];
@@ -57,7 +55,11 @@ tabButton.addEventListener("click", async () => {
     const data = { title, url, description };
     dataArray.push(data);
   }
-  fetchPost("http://127.0.0.1:5000/url/add/list", data, "Error in adding URL:");
+  fetchPost(
+    "http://127.0.0.1:5000/url/add/list",
+    dataArray,
+    "Error in adding URL:"
+  );
 });
 
 // Print Button

@@ -1,5 +1,3 @@
-console.log("Server JavaScript Script");
-
 const apiCallButton = document.querySelector("#apiCallButton");
 
 /**
