@@ -115,11 +115,18 @@ printTabsButton.addEventListener("click", () => {
   console.log(tabsArray);
 });
 
+const sessionsContainer = document.querySelector("#sessionsContainer");
+function createSession(session) {
+  const container = document.createElement("div");
+  container.innerText = "Example 1";
+  sessionsContainer.appendChild(container);
+}
 /**
  * Get the current tabs on startup of extension
  */
 async function startup() {
   tabsArray = await getTabs();
   currentTab = await getCurrentTab();
+  createSession({});
 }
 startup();
