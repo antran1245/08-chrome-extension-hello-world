@@ -65,13 +65,16 @@ function setStorageLocal(session) {
   });
 }
 
-// 'Get Tabs' button
-const tabButton = document.querySelector("#getTabsButton");
+// Create Session Form
+const createSessionForm = document.querySelector("#createSessionForm");
 
 /**
- * Send an array of URL
+ * Save a session on submit button click
  */
-tabButton.addEventListener("click", async () => {
+createSessionForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const formData = new FormData(createSessionForm);
+  const data = Object.fromEntries(formData.entries());
   let dataArray = [];
   for (let tab in tabsArray) {
     const title = tab["title"] != "" ? tab["title"] : tab["url"];
@@ -80,6 +83,7 @@ tabButton.addEventListener("click", async () => {
     const data = { title, url, description };
     dataArray.push(data);
   }
+  console.log(data + "\n" + dataArray);
 });
 
 // Current Button Tabs
@@ -89,6 +93,7 @@ const currentTabButton = document.querySelector("#getCurrentTab");
  */
 currentTabButton.addEventListener("click", async () => {
   await getCurrentTab();
+  console.log(currentTab);
 });
 
 // Save Button
@@ -112,7 +117,9 @@ const printTabsButton = document.querySelector("#printTabsArray");
  * Print the tabs array
  */
 printTabsButton.addEventListener("click", () => {
-  console.log(tabsArray);
+  console.log("Current Tabs: ", tabsArray);
+  getStorageLocal();
+  console.log("Current Storage Local: ", currentStorageLocal);
 });
 
 const sessionsContainer = document.querySelector("#sessionsContainer");

@@ -7,15 +7,10 @@
   </head>
   <body>
     <h1>Hello Extension</h1>
-    <button id="getTabsButton">Get Tabs</button>
-    <button id="getCurrentTab">Get First Tab</button>
-    <button id="saveTabButton">Save Tab3</button>
-    <button id="printTabsArray">Print Tabs</button>
-    <div id="sessionsContainer"></div>
     <form id="createSessionForm">
       <div>
         <label for="createSessionName">Enter a Title</label>
-        <input type="text" id="createSessionName" name="name" required />
+        <input type="text" id="createSessionName" name="name" />
       </div>
       <div>
         <label for="createSessionDescription"
@@ -23,11 +18,14 @@
         >
         <input type="text" id="createSessionDescription" name="description" />
       </div>
-      <button type="submit">Submit</button>
+      <button id="saveSession" type="submit">Save Session</button>
     </form>
+    <button id="getCurrentTab">Get Current Tab</button>
+    <button id="saveTabButton">Save Tab</button>
+    <button id="printTabsArray">Print Tabs</button>
+    <div id="sessionsContainer"></div>
     <script src="popup.js"></script>
     <!-- <script src="../scripts/tab.js"></script>
-    <script src="../scripts/session.js"></script>
     <script src="../scripts/serverHandler.js"></script> -->
   </body>
 </html>
