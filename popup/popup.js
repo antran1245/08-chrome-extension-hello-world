@@ -1,3 +1,5 @@
+// Global Variables
+
 // Options for tabs query
 let tabQueryOptions = {};
 
@@ -9,6 +11,8 @@ let currentTab = {};
 // Storage Local
 let currentStorageLocal = {};
 let sessionKeyName = "sessions";
+
+// CHROME Extension functions
 
 /**
  * Retrieves an array of object with tabs and details.
@@ -48,9 +52,9 @@ function getCurrentTab() {
  * Set the current sessions
  */
 function getStorageLocal() {
-  chrome.storage.local.get([sessionKeyName]).then((result) => {
-    console.log("Sessions were recieved.");
-    currentStorageLocal = result[sessionKeyName];
+  chrome.storage.local.get([sessionKeyName], (result) => {
+    console.log(result);
+    currentStorageLocal = result ? result : {};
   });
 }
 
@@ -60,14 +64,55 @@ function getStorageLocal() {
  */
 function setStorageLocal(session) {
   currentStorageLocal[session.name] = session;
-  chrome.storage.local.set({ sessionKeyName: { currentStorageLocal } }, () => {
+  chrome.storage.local.set({ [sessionKeyName]: currentStorageLocal }, () => {
     console.log("Session was saved.");
   });
 }
 
+/**
+ * Clear all Sessions
+ */
+function clearStorageLocal() {
+  chrome.storage.local.clear(function () {
+    if (chrome.runtime.lastError) {
+      console.error("Error clearing local storage:", chrome.runtime.lastError);
+    } else {
+      console.log("Local storage cleared");
+    }
+  });
+}
+
+/**
+ * Remove a session from the storage.
+ * @param {string} key - Session name to remove
+ */
+function removeStorageLocal(key) {
+  chrome.storage.local.remove(key, function () {
+    if (chrome.runtime.lastError) {
+      console.error("Error removing key:", chrome.runtime.lastError);
+    } else {
+      console.log("Key removed from local storage");
+    }
+  });
+}
+
+// Helper Functions
+
+/**
+ * Return the current date and time
+ * @returns string
+ */
+function currentDate() {
+  const now = new Date();
+  const isoString = now.toLocaleString();
+  const [date, time] = isoString.split(", ");
+  return `${date} ${time}`;
+}
+
+// Elements and functions
+
 // Create Session Form
 const createSessionForm = document.querySelector("#createSessionForm");
-
 /**
  * Save a session on submit button click
  */
@@ -75,15 +120,24 @@ createSessionForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(createSessionForm);
   const data = Object.fromEntries(formData.entries());
-  let dataArray = [];
-  for (let tab in tabsArray) {
+  let dataObject = {};
+  for (const tab of tabsArray) {
     const title = tab["title"] != "" ? tab["title"] : tab["url"];
     const url = tab["url"];
     const description = tab["title"] != "" ? tab["title"] : tab["url"];
     const data = { title, url, description };
-    dataArray.push(data);
+    dataObject[tab["windowId"]] =
+      tab["windowId"] in dataObject
+        ? [...dataObject[tab["windowId"]], data]
+        : [data];
   }
-  console.log(data + "\n" + dataArray);
+  let session = {
+    name: data["name"],
+    description: data["description"],
+    browsers: dataObject,
+  };
+  console.log(session);
+  setStorageLocal(session);
 });
 
 // Current Button Tabs
@@ -117,23 +171,31 @@ const printTabsButton = document.querySelector("#printTabsArray");
  * Print the tabs array
  */
 printTabsButton.addEventListener("click", () => {
-  console.log("Current Tabs: ", tabsArray);
+  // console.log("Current Tabs: ", tabsArray);
   getStorageLocal();
   console.log("Current Storage Local: ", currentStorageLocal);
 });
 
+// Session Container to display sessions
 const sessionsContainer = document.querySelector("#sessionsContainer");
+/**
+ * Add elements to the Session container
+ * @param {Object} session
+ */
 function createSession(session) {
   const container = document.createElement("div");
   container.innerText = "Example 1";
   sessionsContainer.appendChild(container);
 }
+
+const createSessionFormTitle = document.querySelector("#createSessionName");
 /**
  * Get the current tabs on startup of extension
  */
 async function startup() {
   tabsArray = await getTabs();
   currentTab = await getCurrentTab();
-  createSession({});
+  createSessionFormTitle.value = "Session " + currentDate();
+  createSession(currentStorageLocal);
 }
 startup();
