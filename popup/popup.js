@@ -49,12 +49,13 @@ function getCurrentTab() {
 }
 
 /**
- * Set the current sessions
+ * Get the storage sessions
+ * @param {boolean} create - Determine if need to run the createSession function
  */
-function getStorageLocal() {
+function getStorageLocal(create = false) {
   chrome.storage.local.get([sessionKeyName], (result) => {
-    console.log(result);
-    currentStorageLocal = result ? result : {};
+    currentStorageLocal = result[sessionKeyName] ? result[sessionKeyName] : {};
+    if (create) createSession(result[sessionKeyName]);
   });
 }
 
@@ -63,10 +64,13 @@ function getStorageLocal() {
  * @param {Object} session
  */
 function setStorageLocal(session) {
-  currentStorageLocal[session.name] = session;
+  let newSession = { [session["name"]]: session };
+  currentStorageLocal = { ...currentStorageLocal, ...newSession };
   chrome.storage.local.set({ [sessionKeyName]: currentStorageLocal }, () => {
     console.log("Session was saved.");
+    console.log(currentStorageLocal);
   });
+  console.log(currentStorageLocal);
 }
 
 /**
@@ -136,7 +140,6 @@ createSessionForm.addEventListener("submit", async (event) => {
     description: data["description"],
     browsers: dataObject,
   };
-  console.log(session);
   setStorageLocal(session);
 });
 
@@ -176,16 +179,72 @@ printTabsButton.addEventListener("click", () => {
   console.log("Current Storage Local: ", currentStorageLocal);
 });
 
+// Clear All Button
+const clearAllButton = document.querySelector("#clearSessions");
+clearAllButton.addEventListener("click", () => {
+  clearStorageLocal();
+});
+
 // Session Container to display sessions
 const sessionsContainer = document.querySelector("#sessionsContainer");
 /**
- * Add elements to the Session container
+ * Create a list of sessions to display.
+ * Elements: A container containing text and an open button.
  * @param {Object} session
  */
 function createSession(session) {
-  const container = document.createElement("div");
-  container.innerText = "Example 1";
-  sessionsContainer.appendChild(container);
+  for (let key in session) {
+    // Create a container div
+    const container = document.createElement("div");
+    container.innerText = `${key}`;
+
+    // Create a button with a onclick function, then add to container div
+    const openButton = document.createElement("button");
+    openButton.innerText = "Open";
+    openButton.addEventListener("click", () => {
+      openSession(session[key]);
+    });
+    container.appendChild(openButton);
+
+    // Add the container to the list of session to display
+    sessionsContainer.appendChild(container);
+  }
+}
+
+/**
+ * Open the selected session
+ * @param {object} session - session details
+ */
+function openSession(session) {
+  // Loop the browsers object
+  for (let browser in session["browsers"]) {
+    let urls = [];
+
+    // Loop the array of URLs to create an url array
+    for (let tab of session["browsers"][browser]) {
+      urls.push(tab["url"]);
+    }
+    // Create a window to add tabs
+    chrome.windows.create(
+      {
+        state: "normal",
+      },
+      (newWindow) => {
+        // Create tabs for the window
+        urls.forEach((url, index) => {
+          chrome.tabs.create({
+            windowId: newWindow.id,
+            url: url,
+            active: index == urls.length - 1,
+          });
+        });
+        // Close the first tab which is a blank tab
+        chrome.tabs.query({ windowId: newWindow.id }, (tabs) => {
+          if (tabs.length > 0) chrome.tabs.remove(tabs[0].id);
+        });
+      }
+    );
+  }
 }
 
 const createSessionFormTitle = document.querySelector("#createSessionName");
@@ -196,6 +255,6 @@ async function startup() {
   tabsArray = await getTabs();
   currentTab = await getCurrentTab();
   createSessionFormTitle.value = "Session " + currentDate();
-  createSession(currentStorageLocal);
+  await getStorageLocal(true);
 }
 startup();
